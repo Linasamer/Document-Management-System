@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.8.xsd">
+
+    <changeSet id="1" author="your_username">
+        <createSequence sequenceName="doc_metadata_seq" startValue="1" incrementBy="1" ordered="true"/>
+    </changeSet>
+
+    <changeSet id="2" author="your_username">
+        <createTable tableName="DOCUMENT">
+            <column name="ID" type="NUMBER">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="DOC_NAME" type="VARCHAR2(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="DOC_REF" type="VARCHAR2(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="DOC_PATH" type="VARCHAR2(1000)">
+                <constraints nullable="false"/>
+            </column>
+              <column name="DOC_FORMAT" type="VARCHAR2(1000)">
+                <constraints nullable="false"/>
+            </column>
+              <column name="DOC_BASE64" type="CLOB">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="3" author="your_username">
+        <createTable tableName="DOCUMENT_METADATA">
+            <column name="ID" type="NUMBER">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="DOC_ID" type="NUMBER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="UNIT" type="VARCHAR2(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+              <addForeignKeyConstraint baseTableName="DOCUMENT_METADATA"
+                                     baseColumnNames="DOC_ID"
+                                     constraintName="doc_metadata_doc_id_fk"
+                                     referencedTableName="DOCUMENT"
+                                     referencedColumnNames="ID"/>
+                                           
+             <addUniqueConstraint tableName="DOCUMENT_METADATA" constraintName="doc_metadata_unique_constraint"
+                                 columnNames="DOC_ID, UNIT"/>
+    </changeSet>
+
+</databaseChangeLog>
