@@ -50,6 +50,11 @@ public class DocumentService {
 		if (documentRequest.getEsaalFile() == null || documentRequest.getEsaalFile().isEmpty()) {
 			throw new BusinessException("File is empty or null");
 		}
+		Optional<Document> doc = documentRepository.findByDocName(documentRequest.getEsaalFileName());
+		if (doc.isPresent()) {
+			throw new BusinessException("Doc is already exist");
+		}
+
 		byte[] decodedBytes;
 		try {
 			decodedBytes = Base64.getDecoder().decode(documentRequest.getEsaalFile());
@@ -70,7 +75,7 @@ public class DocumentService {
 				documentRequest.getEsaalFileFormat(), documentRequest.getEsaalFileName(), correlationId, authorization);
 
 		Document document = new Document();
-		document.setDocName(completeFileName);
+		document.setDocName(documentRequest.getEsaalFileName());
 		document.setDocPath(UPLOAD_DIR + completeFileName);
 		document.setDocRef(docRef.getFileId());
 		document.setDocFormat(documentRequest.getEsaalFileFormat());

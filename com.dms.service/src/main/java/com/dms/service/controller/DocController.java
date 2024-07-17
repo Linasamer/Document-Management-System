@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.dms.service.exceptions.BusinessException;
 import com.dms.service.request.DocumentRequest;
 import com.dms.service.response.DocumentInfoResponse;
 import com.dms.service.response.DocumentInfoResponseList;
@@ -45,12 +44,10 @@ public class DocController {
 			@ApiResponse(responseCode = "502", description = "Generic bad gateway error") })
 	public ResponseEntity<DocumentInfoResponse> uploadDocument(@NotNull @RequestHeader("x-correlation-id") String correlationId,
 			@NotNull @RequestHeader("Authorization") String authorization, @RequestBody DocumentRequest documentRequest) throws Exception {
-		try {
-			DocumentInfoResponse response = documentService.saveDocument(correlationId, authorization, documentRequest);
-			return ResponseEntity.ok(response);
-		} catch (Exception e) {
-			return ResponseEntity.status(500).body(null);
-		}
+
+		DocumentInfoResponse response = documentService.saveDocument(correlationId, authorization, documentRequest);
+		return ResponseEntity.ok(response);
+
 	}
 
 	@GetMapping(value = "/retrieve")
@@ -62,15 +59,11 @@ public class DocController {
 			@ApiResponse(responseCode = "503", description = "Service unavailable"),
 			@ApiResponse(responseCode = "502", description = "Generic bad gateway error") })
 	public ResponseEntity<DocumentResponse> retrieveDocument(@NotNull @RequestHeader("x-correlation-id") String correlationId,
-			@NotNull @RequestHeader("Authorization") String authorization, @RequestParam("DocumentId") Long id) {
-		try {
-			DocumentResponse response = documentService.retrieveDocument(correlationId, authorization, id);
-			return ResponseEntity.ok(response);
-		} catch (BusinessException e) {
-			return ResponseEntity.status(404).body(null);
-		} catch (IOException e) {
-			return ResponseEntity.status(500).body(null);
-		}
+			@NotNull @RequestHeader("Authorization") String authorization, @RequestParam("DocumentId") Long id) throws IOException {
+
+		DocumentResponse response = documentService.retrieveDocument(correlationId, authorization, id);
+		return ResponseEntity.ok(response);
+
 	}
 
 	@GetMapping("/documents")
@@ -102,14 +95,10 @@ public class DocController {
 	public ResponseEntity<DocumentInfoResponse> updateDocument(@NotNull @RequestHeader("x-correlation-id") String correlationId,
 			@NotNull @RequestHeader("Authorization") String authorization, @RequestParam("esaal_id") Long id,
 			@RequestParam("file_tags") List<String> metaData) throws Exception {
-		try {
-			DocumentInfoResponse documentInfoResponse = documentService.updateDocument(correlationId, authorization, id, metaData);
-			return ResponseEntity.ok(documentInfoResponse);
-		} catch (BusinessException e) {
-			return ResponseEntity.status(404).body(null);
-		} catch (IOException e) {
-			return ResponseEntity.status(500).body(null);
-		}
+
+		DocumentInfoResponse documentInfoResponse = documentService.updateDocument(correlationId, authorization, id, metaData);
+		return ResponseEntity.ok(documentInfoResponse);
+
 	}
 
 	@DeleteMapping(value = "/delete")
@@ -122,16 +111,10 @@ public class DocController {
 			@ApiResponse(responseCode = "502", description = "Generic bad gateway error") })
 	public ResponseEntity<String> deleteDocument(@NotNull @RequestHeader("x-correlation-id") String correlationId,
 			@NotNull @RequestHeader("Authorization") String authorization, @RequestParam Long id) throws Exception {
-		try {
-			documentService.deleteDocument(correlationId, authorization, id);
-			return ResponseEntity.ok("Document Has Been Deleted Successfully");
-		} catch (BusinessException e) {
-			if ("Document not found".equals(e.getMessage())) {
-				return ResponseEntity.status(404).build();
-			} else {
-				return ResponseEntity.status(500).build();
-			}
-		}
+
+		documentService.deleteDocument(correlationId, authorization, id);
+		return ResponseEntity.ok("Document Has Been Deleted Successfully");
+
 	}
 
 }
