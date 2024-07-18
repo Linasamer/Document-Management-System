@@ -5,10 +5,18 @@
                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.8.xsd">
 
     <changeSet id="1" author="your_username">
+        <createSequence sequenceName="doc_seq" startValue="1" incrementBy="1" ordered="true"/>
+    </changeSet>
+    
+     <changeSet id="2" author="your_username">
         <createSequence sequenceName="doc_metadata_seq" startValue="1" incrementBy="1" ordered="true"/>
     </changeSet>
+    
+     <changeSet id="3" author="your_username">
+        <createSequence sequenceName="doc_config_seq" startValue="1" incrementBy="1" ordered="true"/>
+    </changeSet>
 
-    <changeSet id="2" author="your_username">
+    <changeSet id="4" author="your_username">
         <createTable tableName="DOCUMENT">
             <column name="ID" type="NUMBER">
                 <constraints primaryKey="true" nullable="false"/>
@@ -31,7 +39,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="3" author="your_username">
+    <changeSet id="5" author="your_username">
         <createTable tableName="DOCUMENT_METADATA">
             <column name="ID" type="NUMBER">
                 <constraints primaryKey="true" nullable="false"/>
@@ -51,6 +59,35 @@
                                            
              <addUniqueConstraint tableName="DOCUMENT_METADATA" constraintName="doc_metadata_unique_constraint"
                                  columnNames="DOC_ID, UNIT"/>
+    </changeSet>
+    
+        <changeSet id="6" author="your_username">
+        <createTable tableName="DOCUMENT_CONFIG">
+            <column name="ID" type="NUMBER">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="CODE" type="VARCHAR2(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="VALUE" type="VARCHAR2(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="PROD_VALUE" type="VARCHAR2(255)">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+    
+     <changeSet id="7" author="your_username">
+       <sql>
+            INSERT INTO DMS.DOCUMENT_CONFIG (ID, CODE, VALUE, PROD_VALUE) VALUES (1, 'AI_URL', 'http://41.33.183.2:4012/insert-esaal-file', '');
+        </sql>
+    </changeSet>
+    
+    <changeSet id="8" author="your_username">
+     <sql>
+            INSERT INTO DMS.DOCUMENT_CONFIG (ID, CODE, VALUE, PROD_VALUE) VALUES (2, 'INTEGRATION_WITH_AI_OFF', 'true', '');
+        </sql>
     </changeSet>
 
 </databaseChangeLog>

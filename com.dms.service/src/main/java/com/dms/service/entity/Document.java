@@ -19,8 +19,8 @@ import lombok.NoArgsConstructor;
 public class Document {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "doc_metadata_seq_gen")
-	@SequenceGenerator(name = "doc_metadata_seq_gen", sequenceName = "doc_metadata_seq", allocationSize = 1)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "doc_seq_gen")
+	@SequenceGenerator(name = "doc_seq_gen", sequenceName = "doc_seq", allocationSize = 1)
 	@Column(name = "ID")
 	private Long id;
 

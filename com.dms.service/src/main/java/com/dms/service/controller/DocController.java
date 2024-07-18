@@ -43,14 +43,15 @@ public class DocController {
 			@ApiResponse(responseCode = "503", description = "Service Unavailable"),
 			@ApiResponse(responseCode = "502", description = "Generic bad gateway error") })
 	public ResponseEntity<DocumentInfoResponse> uploadDocument(@NotNull @RequestHeader("x-correlation-id") String correlationId,
-			@NotNull @RequestHeader("Authorization") String authorization, @RequestBody DocumentRequest documentRequest) throws Exception {
+			@NotNull @RequestHeader(value = "Authorization", defaultValue = "defaultToken") String authorization,
+			@RequestBody DocumentRequest documentRequest) throws Exception {
 
 		DocumentInfoResponse response = documentService.saveDocument(correlationId, authorization, documentRequest);
 		return ResponseEntity.ok(response);
 
 	}
 
-	@GetMapping(value = "/retrieve")
+	@GetMapping
 	@Operation(description = "Retrieving document data")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Document retrieved successfully"),
 			@ApiResponse(responseCode = "400", description = "Bad request"), @ApiResponse(responseCode = "401", description = "Unauthorized"),

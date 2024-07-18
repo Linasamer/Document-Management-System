@@ -112,17 +112,23 @@ public class DocumentService {
 		if (name == null || name.isEmpty()) {
 			return retrevieAllDocument(pageable);
 		}
-		return retrevieByName(name);
+		return retrevieByName(name, pageable);
 	}
 
-	public DocumentInfoResponseList retrevieByName(String name) {
+	public DocumentInfoResponseList retrevieByName(String name, Pageable pageable) {
 		List<DocumentInfoResponse> documentInfoResponses = new ArrayList<DocumentInfoResponse>();
-		Optional<Document> document = documentRepository.findByDocName(name);
-		if (!document.isPresent()) {
+		Page<Document> documentList = documentRepository.findByDocName(name, pageable);
+		if (documentList.getContent().isEmpty()) {
 			throw new BusinessException("Doc Not Found");
 		}
-		List<DocumentMetadata> documentMetadataList = documentMetadataRepository.findBydocumentId(document.get().getId());
-		documentInfoResponses.add(DocumentInfoResponseMapper.INSTANCE.mapToDocumentInfoResponse(document.get(), documentMetadataList));
+		List<Long> documentIds = documentList.stream().map(Document::getId).collect(Collectors.toList());
+		List<DocumentMetadata> documentMetadataList = documentMetadataRepository.findAllByDocumentIdIn(documentIds);
+		for (Document document : documentList) {
+			List<DocumentMetadata> metadataForDocument = documentMetadataList.stream()
+					.filter(metadata -> metadata.getDocumentId().equals(document.getId())).collect(Collectors.toList());
+
+			documentInfoResponses.add(DocumentInfoResponseMapper.INSTANCE.mapToDocumentInfoResponse(document, metadataForDocument));
+		}
 		return DocumentInfoResponseList.builder().documents(documentInfoResponses).build();
 	}
 
