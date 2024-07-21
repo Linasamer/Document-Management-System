@@ -1,28 +1,83 @@
 package com.dms.service.exceptions;
 
+import java.util.Date;
+
+import org.springframework.http.HttpStatus;
+
 public class ErrorResponse {
-	private String errorMessage;
-	private int errorCode;
 
-	public ErrorResponse(String errorMessage, int errorCode) {
-		this.errorMessage = errorMessage;
-		this.errorCode = errorCode;
+	private Date timestamp;
+	private HttpStatus status;
+	private String path;
+	private String message;
+	private String debugMessage;
+	private Object[] parameters;
+
+	public ErrorResponse(HttpStatus status, String path, String message, Object[] parameters) {
+		this.timestamp = new Date();
+		this.status = status;
+		this.message = message;
+		this.path = path;
+		this.parameters = parameters;
 	}
 
-	public String getErrorMessage() {
-		return errorMessage;
+	public ErrorResponse(String errorMessage, HttpStatus errorCode) {
+		this.message = errorMessage;
+		this.status = errorCode;
 	}
 
-	public void setErrorMessage(String errorMessage) {
-		this.errorMessage = errorMessage;
+	public ErrorResponse(HttpStatus status, String path, String message) {
+		this.timestamp = new Date();
+		this.status = status;
+		this.message = message;
+		this.path = path;
 	}
 
-	public int getErrorCode() {
-		return errorCode;
+	public Date getTimestamp() {
+		return timestamp;
 	}
 
-	public void setErrorCode(int errorCode) {
-		this.errorCode = errorCode;
+	public void setTimestamp(Date timestamp) {
+		this.timestamp = timestamp;
 	}
 
+	public HttpStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(HttpStatus status) {
+		this.status = status;
+	}
+
+	public String getPath() {
+		return path;
+	}
+
+	public void setPath(String path) {
+		this.path = path;
+	}
+
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
+	}
+
+	public Object[] getParameters() {
+		return parameters;
+	}
+
+	public void setParameters(Object[] parameters) {
+		this.parameters = parameters;
+	}
+
+	public String getDebugMessage() {
+		return debugMessage;
+	}
+
+	public void setDebugMessage(String debugMessage) {
+		this.debugMessage = debugMessage;
+	}
 }

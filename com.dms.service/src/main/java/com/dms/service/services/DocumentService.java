@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import com.dms.service.entity.Document;
 import com.dms.service.entity.DocumentMetadata;
 import com.dms.service.exceptions.BusinessException;
+import com.dms.service.exceptions.DataNotFoundException;
 import com.dms.service.repository.DocumentMetadataRepository;
 import com.dms.service.repository.DocumentRepository;
 import com.dms.service.request.DocumentRequest;
@@ -52,14 +53,14 @@ public class DocumentService {
 		}
 		Optional<Document> doc = documentRepository.findByDocName(documentRequest.getEsaalFileName());
 		if (doc.isPresent()) {
-			throw new BusinessException("Doc is already exist");
+			throw new Exception("Doc is already exist");
 		}
 
 		byte[] decodedBytes;
 		try {
 			decodedBytes = Base64.getDecoder().decode(documentRequest.getEsaalFile());
 		} catch (IllegalArgumentException e) {
-			throw new BusinessException("Invalid Base64 string", e);
+			throw new Exception("Invalid Base64 string", e);
 		}
 
 		String completeFileName = documentRequest.getEsaalFileName() + "." + documentRequest.getEsaalFileFormat();
@@ -68,7 +69,7 @@ public class DocumentService {
 		try (FileOutputStream fos = new FileOutputStream(path.toFile())) {
 			fos.write(decodedBytes);
 		} catch (IOException e) {
-			throw new BusinessException("Error writing file to disk", e);
+			throw new Exception("Error writing file to disk", e);
 		}
 
 		AIUploadResponse docRef = restClientService.uploadFile(documentRequest.getEsaalFile(), documentRequest.getFileTags(),
@@ -84,7 +85,7 @@ public class DocumentService {
 		try {
 			document = documentRepository.save(document);
 		} catch (Exception e) {
-			throw new BusinessException(e.getMessage());
+			throw new Exception(e.getMessage());
 		}
 
 		List<DocumentMetadata> savedDocumentMetadatas = saveListDoumentMetaData(documentRequest.getFileTags(), document);
@@ -95,7 +96,7 @@ public class DocumentService {
 	public DocumentResponse retrieveDocument(String correlationId, String authorization, Long id) throws IOException {
 		Optional<Document> documentOptional = documentRepository.findById(id);
 		if (!documentOptional.isPresent()) {
-			throw new BusinessException("Document not found");
+			throw new DataNotFoundException("Document not found");
 		}
 
 		Document document = documentOptional.get();
@@ -119,7 +120,7 @@ public class DocumentService {
 		List<DocumentInfoResponse> documentInfoResponses = new ArrayList<DocumentInfoResponse>();
 		Page<Document> documentList = documentRepository.findByDocName(name, pageable);
 		if (documentList.getContent().isEmpty()) {
-			throw new BusinessException("Doc Not Found");
+			throw new DataNotFoundException("Doc Not Found");
 		}
 		List<Long> documentIds = documentList.stream().map(Document::getId).collect(Collectors.toList());
 		List<DocumentMetadata> documentMetadataList = documentMetadataRepository.findAllByDocumentIdIn(documentIds);
@@ -150,7 +151,7 @@ public class DocumentService {
 	public DocumentInfoResponse updateDocument(String correlationId, String authorization, Long id, List<String> metadate) throws Exception {
 		Optional<Document> updateDoc = documentRepository.findById(id);
 		if (!updateDoc.isPresent()) {
-			throw new BusinessException("Doc Not Found");
+			throw new DataNotFoundException("Doc Not Found");
 		}
 		restClientService.updataFileTags(id.toString(), metadate, correlationId, authorization);
 
@@ -162,7 +163,7 @@ public class DocumentService {
 	public void deleteDocument(String correlationId, String authorization, Long id) throws Exception {
 		Optional<Document> document = documentRepository.findById(id);
 		if (!document.isPresent()) {
-			throw new BusinessException("Document not found");
+			throw new DataNotFoundException("Document not found");
 		}
 
 		restClientService.deleteFile(id.toString(), correlationId, authorization);
