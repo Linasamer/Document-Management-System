@@ -1,23 +1,18 @@
 package com.dms.service.services;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.transaction.Transactional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.dms.service.entity.Document;
 import com.dms.service.entity.DocumentMetadata;
@@ -36,8 +31,6 @@ import com.dms.service.response.DocumentResponse;
 @Transactional
 public class DocumentService {
 
-	private final String UPLOAD_DIR = "src/main/resources/documents/";
-
 	@Autowired
 	public DocumentMetadataRepository documentMetadataRepository;
 
@@ -53,7 +46,7 @@ public class DocumentService {
 		}
 		Optional<Document> doc = documentRepository.findByDocName(documentRequest.getEsaalFileName());
 		if (doc.isPresent()) {
-			throw new Exception("Doc is already exist");
+			throw new BusinessException("Doc is already exist");
 		}
 
 		byte[] decodedBytes;
@@ -64,20 +57,13 @@ public class DocumentService {
 		}
 
 		String completeFileName = documentRequest.getEsaalFileName() + "." + documentRequest.getEsaalFileFormat();
-		Path path = Paths.get(UPLOAD_DIR + completeFileName);
-
-		try (FileOutputStream fos = new FileOutputStream(path.toFile())) {
-			fos.write(decodedBytes);
-		} catch (IOException e) {
-			throw new Exception("Error writing file to disk", e);
-		}
 
 		AIUploadResponse docRef = restClientService.uploadFile(documentRequest.getEsaalFile(), documentRequest.getFileTags(),
 				documentRequest.getEsaalFileFormat(), documentRequest.getEsaalFileName(), correlationId, authorization);
 
 		Document document = new Document();
 		document.setDocName(documentRequest.getEsaalFileName());
-		document.setDocPath(UPLOAD_DIR + completeFileName);
+		document.setDocPath(completeFileName);
 		document.setDocRef(docRef.getFileId());
 		document.setDocFormat(documentRequest.getEsaalFileFormat());
 		document.setDocBase64(documentRequest.getEsaalFile());
@@ -176,12 +162,12 @@ public class DocumentService {
 			throw new BusinessException("Error deleting document", e);
 		}
 
-		Path path = Paths.get(document.get().getDocPath());
-		try {
-			Files.deleteIfExists(path);
-		} catch (IOException e) {
-			throw new BusinessException("Error deleting file from disk", e);
-		}
+		// Path path = Paths.get(document.get().getDocPath());
+		// try {
+		// Files.deleteIfExists(path);
+		// } catch (IOException e) {
+		// throw new BusinessException("Error deleting file from disk", e);
+		// }
 	}
 
 	private List<DocumentMetadata> saveListDoumentMetaData(List<String> metaData, Document document) {
