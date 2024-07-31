@@ -1,47 +1,36 @@
 package com.dms.service.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-import com.dms.service.exceptions.BusinessException;
 import com.dms.service.security.model.AuthenticationRequest;
 import com.dms.service.security.model.AuthenticationResponse;
-import com.dms.service.security.model.UserDetailsImpl;
 
-@Service
+@Component
 public class AuthenticationService {
-	@Value("${ldap.enabled}") // get flag from application.properties
-	private boolean ldapEnabled;
 
-	private SecurityService securityService;
-
-	private AuthenticationManager authenticationManager;
+	private final AuthenticationManager authenticationManager;
+	private final JwtUtilities jwtUtilities;
 
 	@Autowired
-	private AuthenticationService(SecurityService securityService, AuthenticationManager authenticationManager) {
-		this.securityService = securityService;
+	public AuthenticationService(AuthenticationManager authenticationManager, JwtUtilities jwtUtilities) {
 		this.authenticationManager = authenticationManager;
+		this.jwtUtilities = jwtUtilities;
 	}
 
-	// TODO: exception handling
-	public AuthenticationResponse authenticateUser(AuthenticationRequest authenticationRequest) {
-		if (!securityService.authenticateUser(authenticationRequest.getUsername(), authenticationRequest.getPassword(), ldapEnabled))
-			throw new BusinessException("error_invalidUserNameOrPassword");
-
+	public AuthenticationResponse authenticateUser(AuthenticationRequest authenticationRequest) throws AuthenticationException {
 		UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(authenticationRequest.getUsername(),
-				authenticationRequest.getSystemPassword());
+				authenticationRequest.getPassword());
+
 		Authentication authentication = authenticationManager.authenticate(authenticationToken);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
-		String token = JwtUtilities.generateJwtToken(authenticationRequest.getUsername());
-		UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-
-		return new AuthenticationResponse(token);
+		String jwtToken = jwtUtilities.generateJwtToken(authenticationRequest.getUsername());
+		return new AuthenticationResponse(jwtToken);
 	}
-
 }

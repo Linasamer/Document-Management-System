@@ -2,7 +2,13 @@ package com.dms.service.security;
 
 import java.util.Date;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Jwts;
@@ -11,26 +17,28 @@ import io.jsonwebtoken.SignatureAlgorithm;
 @Component
 public class JwtUtilities {
 
-	private static String secretKey;
-
 	@Value("${jwt.secretKey}")
-	public void setSecretKey(String name) {
-		JwtUtilities.secretKey = name;
-	}
-
-	private static int expirationMs;
+	private String secretKey;
 
 	@Value("${jwt.expirationMs}")
-	public void setExpirationMs(int expirationMs) {
-		JwtUtilities.expirationMs = expirationMs;
-	}
+	private int expirationMs;
 
-	public static String generateJwtToken(String username) {
+	@Autowired
+	@Qualifier("customUserDetailsService") // Use the bean name or qualifier that you want
+	private UserDetailsService userDetailsService;
+
+	public String generateJwtToken(String username) {
 		return Jwts.builder().setSubject(username).setIssuedAt(new Date()).setExpiration(new Date(System.currentTimeMillis() + expirationMs))
 				.signWith(SignatureAlgorithm.HS512, secretKey).compact();
 	}
 
-	public static String getUsernameFromJwtToken(String jwtToken) {
+	public String getUsernameFromJwtToken(String jwtToken) {
 		return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(jwtToken).getBody().getSubject();
+	}
+
+	public Authentication getAuthentication(String jwtToken) {
+		String username = getUsernameFromJwtToken(jwtToken);
+		UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+		return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 	}
 }

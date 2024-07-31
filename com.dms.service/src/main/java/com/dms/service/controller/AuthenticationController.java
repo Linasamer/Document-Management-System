@@ -17,7 +17,7 @@ import com.dms.service.security.model.AuthenticationResponse;
 @CrossOrigin(origins = "*")
 public class AuthenticationController {
 
-	private AuthenticationService authenticationService;
+	private final AuthenticationService authenticationService;
 
 	@Autowired
 	public AuthenticationController(AuthenticationService authenticationService) {
@@ -29,7 +29,8 @@ public class AuthenticationController {
 		try {
 			return this.authenticationService.authenticateUser(authenticationRequest);
 		} catch (Exception e) {
-			throw new BusinessException("error_invalidUserNameOrPassword");
+			e.printStackTrace();
+			throw new BusinessException("error_invalidUserNameOrPassword", e);
 		}
 	}
 }
