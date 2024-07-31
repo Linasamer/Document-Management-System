@@ -3,12 +3,10 @@ package com.dms.service.security;
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Jwts;
@@ -24,8 +22,7 @@ public class JwtUtilities {
 	private int expirationMs;
 
 	@Autowired
-	@Qualifier("customUserDetailsService") // Use the bean name or qualifier that you want
-	private UserDetailsService userDetailsService;
+	private CustomUserDetailsService customUserDetailsService;
 
 	public String generateJwtToken(String username) {
 		return Jwts.builder().setSubject(username).setIssuedAt(new Date()).setExpiration(new Date(System.currentTimeMillis() + expirationMs))
@@ -38,7 +35,7 @@ public class JwtUtilities {
 
 	public Authentication getAuthentication(String jwtToken) {
 		String username = getUsernameFromJwtToken(jwtToken);
-		UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+		UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
 		return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 	}
 }

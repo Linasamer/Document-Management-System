@@ -3,7 +3,6 @@ package com.dms.service.services;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -20,18 +19,16 @@ import com.dms.service.response.AIUploadResponse;
 
 @Component
 public class RestClientService {
-	@Autowired
-	private ConfigurationService configurationService;
 
 	public <T extends Object> AIUploadResponse uploadFile(String base64File, List<String> fileTags, String documentType, String documentName,
 			String correlationId, String authorization) throws Exception {
-		if (configurationService.getIntegartionFlag().equals("true")) {
+		if (ConfigurationService.getIntegartionFlag().equals("true")) {
 			return AIUploadResponse.builder().fileId("Doc_Ref_" + UUID.randomUUID().toString()).build();
 
 		}
 
 		try {
-			String url = UriComponentsBuilder.fromHttpUrl(configurationService.getAiUrl()).queryParam("esaal_file", base64File)
+			String url = UriComponentsBuilder.fromHttpUrl(ConfigurationService.getAiUrl()).queryParam("esaal_file", base64File)
 					.queryParam("file_tags", fileTags).queryParam("document_type", documentType).queryParam("document_name", documentName)
 					.toUriString();
 			HttpHeaders headers = new HttpHeaders();
@@ -56,13 +53,13 @@ public class RestClientService {
 
 	public <T extends Object> AIResponse updataFileTags(String Id, List<String> fileTags, String correlationId, String authorization)
 			throws Exception {
-		if (configurationService.getIntegartionFlag().equals("true")) {
+		if (ConfigurationService.getIntegartionFlag().equals("true")) {
 			return AIResponse.builder().message("File tags updated successfully").build();
 
 		}
 
 		try {
-			String url = UriComponentsBuilder.fromHttpUrl(configurationService.getAiUrl()).queryParam("file_tags", fileTags)
+			String url = UriComponentsBuilder.fromHttpUrl(ConfigurationService.getAiUrl()).queryParam("file_tags", fileTags)
 					.queryParam("file_id ", Id).toUriString();
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.APPLICATION_JSON);
@@ -85,13 +82,13 @@ public class RestClientService {
 	}
 
 	public <T extends Object> AIResponse deleteFile(String Id, String correlationId, String authorization) throws Exception {
-		if (configurationService.getIntegartionFlag().equals("true")) {
+		if (ConfigurationService.getIntegartionFlag().equals("true")) {
 			return AIResponse.builder().message("File deleted successfully").build();
 
 		}
 
 		try {
-			String url = UriComponentsBuilder.fromHttpUrl(configurationService.getAiUrl() + "/" + Id).toUriString();
+			String url = UriComponentsBuilder.fromHttpUrl(ConfigurationService.getAiUrl() + "/" + Id).toUriString();
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.APPLICATION_JSON);
 			headers.set("x-correlation-id", correlationId);

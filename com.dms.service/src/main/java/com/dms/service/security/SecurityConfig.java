@@ -23,13 +23,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
 		// Configure authentication manager with in-memory users or other authentication providers
+		// auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
 		auth.inMemoryAuthentication().withUser("testuser").password(passwordEncoder().encode("testpassword")).roles("USER");
 	}
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		http.authorizeRequests().antMatchers("/api/authentication").permitAll().anyRequest().authenticated().and().cors().and().csrf().disable()
-				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+		http.authorizeRequests().antMatchers("/api/authentication").permitAll().antMatchers("/swagger-ui**/**").permitAll()
+				.antMatchers("/v3/api-docs/**").permitAll().anyRequest().authenticated().and().cors().and().csrf().disable().sessionManagement()
+				.sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
 				.addFilterBefore(requestFilter, UsernamePasswordAuthenticationFilter.class);
 	}
 

@@ -36,11 +36,27 @@ public class ConfigurationService {
 		}
 	}
 
-	public String getAiUrl() {
+	public static String getAiUrl() {
 		return configurationMap.get("AI_URL");
 	}
 
-	public String getIntegartionFlag() {
+	public static String getIntegartionFlag() {
 		return configurationMap.get("INTEGRATION_WITH_AI_OFF");
+	}
+
+	public static String getLDAPConnectionType() {
+		return configurationMap.get("LDAP_CONNECTION_TYPE");
+	}
+
+	public static String getLDAPDomain() {
+		return configurationMap.get("LDAP_DOMAIN");
+	}
+
+	public static String getLDAPIPS() {
+		return configurationMap.get("LDAP_IPS");
+	}
+
+	public static String getLDAPPort() {
+		return configurationMap.get("LDAP_PORT");
 	}
 }
