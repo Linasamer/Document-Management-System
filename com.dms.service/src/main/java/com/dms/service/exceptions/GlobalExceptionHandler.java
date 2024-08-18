@@ -12,6 +12,10 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(BusinessException.class)
 	public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException ex, WebRequest request) {
 		ErrorResponse errorResponse = new ErrorResponse(ex.getMessage(), HttpStatus.BAD_REQUEST);
+		if(ex.getMessage().equals("Doc is already exist")) {
+			errorResponse.setStatus(HttpStatus.CONFLICT);
+			return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
+		}
 		return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
 	}
 

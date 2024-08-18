@@ -3,8 +3,10 @@ package com.dms.service.services;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,30 +95,36 @@ public class DocumentService {
 		return DocumentResponse.builder().document(documentInfoResponse).fileBase64(documentOptional.get().getDocBase64()).build();
 	}
 
-	public DocumentInfoResponseList retrevieAllDocumentOrByName(String correlationId, String authorization, String name, int page, int size) {
+	public DocumentInfoResponseList retrevieAllDocumentOrByName(String correlationId, String authorization, String name, String tag, int page, int size) {
 		Pageable pageable = PageRequest.of(page, size);
 
-		if (name == null || name.isEmpty()) {
+		if ((name == null || name.isEmpty()) && (tag == null || tag.isEmpty())) {
 			return retrevieAllDocument(pageable);
 		}
-		return retrevieByName(name, pageable);
+		return retrevieByNameAndTag(name, tag, pageable);
 	}
 
-	public DocumentInfoResponseList retrevieByName(String name, Pageable pageable) {
+	public DocumentInfoResponseList retrevieByNameAndTag(String name,String tag, Pageable pageable) {
 		List<DocumentInfoResponse> documentInfoResponses = new ArrayList<DocumentInfoResponse>();
-		Page<Document> documentList = documentRepository.findByDocName(name, pageable);
+		Page<Document> documentList = documentRepository.findByDocNameAndTag(name, tag, pageable);
 		if (documentList.getContent().isEmpty()) {
 			throw new DataNotFoundException("Doc Not Found");
 		}
-		List<Long> documentIds = documentList.stream().map(Document::getId).collect(Collectors.toList());
+		
+	    Set<Document> uniqueDocuments = new LinkedHashSet<>(documentList.getContent());
+
+		List<Long> documentIds = uniqueDocuments.stream().map(Document::getId).collect(Collectors.toList());
 		List<DocumentMetadata> documentMetadataList = documentMetadataRepository.findAllByDocumentIdIn(documentIds);
-		for (Document document : documentList) {
+		for (Document document : uniqueDocuments) {
 			List<DocumentMetadata> metadataForDocument = documentMetadataList.stream()
 					.filter(metadata -> metadata.getDocumentId().equals(document.getId())).collect(Collectors.toList());
 
 			documentInfoResponses.add(DocumentInfoResponseMapper.INSTANCE.mapToDocumentInfoResponse(document, metadataForDocument));
 		}
-		return DocumentInfoResponseList.builder().documents(documentInfoResponses).build();
+		
+		return DocumentInfoResponseList.builder()
+				.totalRecords(uniqueDocuments.size())
+				.documents(documentInfoResponses).build();
 	}
 
 	public DocumentInfoResponseList retrevieAllDocument(Pageable pageable) {
@@ -130,7 +138,9 @@ public class DocumentService {
 
 			documentInfoResponses.add(DocumentInfoResponseMapper.INSTANCE.mapToDocumentInfoResponse(document, metadataForDocument));
 		}
-		return DocumentInfoResponseList.builder().documents(documentInfoResponses).build();
+		return DocumentInfoResponseList.builder()
+				.totalRecords((int)documentList.getTotalElements())
+				.documents(documentInfoResponses).build();
 
 	}
 
@@ -139,7 +149,7 @@ public class DocumentService {
 		if (!updateDoc.isPresent()) {
 			throw new DataNotFoundException("Doc Not Found");
 		}
-		restClientService.updataFileTags(id.toString(), metadate, correlationId, authorization);
+		restClientService.updataFileTags(updateDoc.get().getDocRef(), metadate, correlationId, authorization);
 
 		deleteListDoumentMetaData(updateDoc.get());
 		List<DocumentMetadata> documentMetadatas = saveListDoumentMetaData(metadate, updateDoc.get());
@@ -152,7 +162,7 @@ public class DocumentService {
 			throw new DataNotFoundException("Document not found");
 		}
 
-		restClientService.deleteFile(id.toString(), correlationId, authorization);
+		restClientService.deleteFile(document.get().getDocRef(), correlationId, authorization);
 
 		deleteListDoumentMetaData(document.get());
 

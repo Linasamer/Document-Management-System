@@ -14,6 +14,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DocumentInfoResponseList {
+	
+    @JsonProperty("TotalRecords")
+    private int totalRecords;
 
 	@JsonProperty("documents")
 	private List<DocumentInfoResponse> documents;

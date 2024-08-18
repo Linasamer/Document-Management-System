@@ -17,8 +17,11 @@ public interface DocumentRepository extends JpaRepository<Document, Long> {
 	Optional<Document> findByDocName(String docName);
 
 	Page<Document> findAll(Pageable pageable);
-
-	@Query("SELECT d FROM Document d WHERE d.docName LIKE %:docName%")
-	Page<Document> findByDocName(@Param("docName") String docName, Pageable pageable);
+	
+	@Query("SELECT d FROM Document d " +
+		       "JOIN DocumentMetadata dm ON d.id = dm.documentId " +
+		       "WHERE d.docName LIKE %:docName% " +
+		       "AND (:tag IS NULL OR :tag = '' OR dm.unit = :tag)")
+	Page<Document> findByDocNameAndTag(@Param("docName") String docName, @Param("tag") String tag, Pageable pageable);
 
 }

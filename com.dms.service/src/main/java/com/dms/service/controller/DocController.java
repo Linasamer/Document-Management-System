@@ -87,9 +87,9 @@ public class DocController {
 			@ApiResponse(responseCode = "502", description = "Generic bad gateway error", content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public ResponseEntity<DocumentInfoResponseList> retrieveDocuments(@NotNull @RequestHeader("x-correlation-id") String correlationId,
 			@NotNull @RequestHeader(value = "Authorization", defaultValue = "defaultToken") String authorization,
-			@RequestParam(required = false) String name, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+			@RequestParam(required = false) String name, @RequestParam(required = false) String tag, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
 
-		DocumentInfoResponseList documentInfoResponsesList = documentService.retrevieAllDocumentOrByName(correlationId, authorization, name, page,
+		DocumentInfoResponseList documentInfoResponsesList = documentService.retrevieAllDocumentOrByName(correlationId, authorization, name, tag, page,
 				size);
 		return ResponseEntity.ok(documentInfoResponsesList);
 

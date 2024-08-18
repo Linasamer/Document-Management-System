@@ -36,8 +36,20 @@ public class ConfigurationService {
 		}
 	}
 
-	public String getAiUrl() {
-		return configurationMap.get("AI_URL");
+	public String getAiDeleteUrl() {
+		return configurationMap.get("AI_DELETE_URL");
+	}
+	
+	public String getAiInsertUrl() {
+		return configurationMap.get("AI_INSERT_URL");
+	}
+
+	public String getAiUpdateUrl() {
+		return configurationMap.get("AI_UPDATE_URL");
+	}
+
+	public String getAiApiKey() {
+		return configurationMap.get("AI_API_KEY");
 	}
 
 	public String getIntegartionFlag() {

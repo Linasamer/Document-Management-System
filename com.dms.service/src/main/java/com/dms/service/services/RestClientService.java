@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -31,15 +33,24 @@ public class RestClientService {
 		}
 
 		try {
-			String url = UriComponentsBuilder.fromHttpUrl(configurationService.getAiUrl()).queryParam("esaal_file", base64File)
-					.queryParam("file_tags", fileTags).queryParam("document_type", documentType).queryParam("document_name", documentName)
+			String url = UriComponentsBuilder.fromHttpUrl(configurationService.getAiInsertUrl())
 					.toUriString();
 			HttpHeaders headers = new HttpHeaders();
-			headers.setContentType(MediaType.APPLICATION_JSON);
+			headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 			headers.set("x-correlation-id", correlationId);
+			headers.set("x-api-key", configurationService.getAiApiKey());
 			headers.set("Authorization", authorization);
 
-			HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+			MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+			body.add("esaal_file", base64File); 
+			body.add("document_type", documentType);
+			body.add("document_name", documentName);
+
+			for (String tag : fileTags) {
+	            body.add("file_tags", tag);
+	        }
+
+			HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);			
 			RestTemplate restTemplate = new RestTemplate();
 			ResponseEntity<AIUploadResponse> responseEntity = restTemplate.exchange(url, HttpMethod.POST, requestEntity, AIUploadResponse.class);
 
@@ -49,7 +60,7 @@ public class RestClientService {
 
 			return responseEntity.getBody();
 		} catch (Exception e) {
-			throw new BusinessException("An error occurred while uploading the file", e);
+			throw new BusinessException("An error occurred while uploading the file" + e.getMessage(), e);
 		}
 
 	}
@@ -62,14 +73,22 @@ public class RestClientService {
 		}
 
 		try {
-			String url = UriComponentsBuilder.fromHttpUrl(configurationService.getAiUrl()).queryParam("file_tags", fileTags)
-					.queryParam("file_id ", Id).toUriString();
+			String url = UriComponentsBuilder.fromHttpUrl(configurationService.getAiUpdateUrl()).toUriString();
 			HttpHeaders headers = new HttpHeaders();
-			headers.setContentType(MediaType.APPLICATION_JSON);
+			headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 			headers.set("x-correlation-id", correlationId);
+			headers.set("x-api-key", configurationService.getAiApiKey());
 			headers.set("Authorization", authorization);
+			
+			MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+			body.add("file_id", Id);
 
-			HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+			for (String tag : fileTags) {
+	            body.add("new_tags", tag);
+	        }
+
+			HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
 			RestTemplate restTemplate = new RestTemplate();
 			ResponseEntity<AIResponse> responseEntity = restTemplate.exchange(url, HttpMethod.PUT, requestEntity, AIResponse.class);
 
@@ -79,7 +98,7 @@ public class RestClientService {
 
 			return responseEntity.getBody();
 		} catch (Exception e) {
-			throw new BusinessException("An error occurred during updating file tags", e);
+			throw new BusinessException("An error occurred during updating file tags" + e.getMessage(), e);
 		}
 
 	}
@@ -91,10 +110,11 @@ public class RestClientService {
 		}
 
 		try {
-			String url = UriComponentsBuilder.fromHttpUrl(configurationService.getAiUrl() + "/" + Id).toUriString();
+			String url = UriComponentsBuilder.fromHttpUrl(configurationService.getAiDeleteUrl() + "/" + Id).toUriString();
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.APPLICATION_JSON);
 			headers.set("x-correlation-id", correlationId);
+			headers.set("x-api-key", configurationService.getAiApiKey());
 			headers.set("Authorization", authorization);
 
 			HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
@@ -107,7 +127,7 @@ public class RestClientService {
 
 			return responseEntity.getBody();
 		} catch (Exception e) {
-			throw new BusinessException("An error occurred during deletion", e);
+			throw new BusinessException("An error occurred during deletion: " + e.getMessage(), e);
 		}
 
 	}
