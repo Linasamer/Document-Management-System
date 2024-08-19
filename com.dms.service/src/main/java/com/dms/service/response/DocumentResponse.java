@@ -15,8 +15,13 @@ public class DocumentResponse {
 
 	@JsonProperty("Document")
 	private DocumentInfoResponse document;
+	
+	@JsonProperty("DocumentFormat")
+	private String documentFormat;
+
 
 	@JsonProperty("FileBase64")
 	private String fileBase64;
+	
 
 }

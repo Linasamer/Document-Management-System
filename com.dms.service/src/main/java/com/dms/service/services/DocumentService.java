@@ -92,7 +92,11 @@ public class DocumentService {
 
 		DocumentInfoResponse documentInfoResponse = DocumentInfoResponseMapper.INSTANCE.mapToDocumentInfoResponse(document, documentMetadataList);
 
-		return DocumentResponse.builder().document(documentInfoResponse).fileBase64(documentOptional.get().getDocBase64()).build();
+		return DocumentResponse.builder()
+				.document(documentInfoResponse)
+				.fileBase64(document.getDocBase64())
+				.documentFormat(document.getDocFormat())
+				.build();
 	}
 
 	public DocumentInfoResponseList retrevieAllDocumentOrByName(String correlationId, String authorization, String name, String tag, int page, int size) {
