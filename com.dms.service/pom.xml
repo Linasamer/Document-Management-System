@@ -93,7 +93,7 @@
 	</dependencies>
 
 	<build>
-		<finalName>DMS-BE</finalName>
+		<finalName>DMS-BE-AUTH</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

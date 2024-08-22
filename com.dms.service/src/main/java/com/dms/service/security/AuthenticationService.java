@@ -45,9 +45,10 @@ public class AuthenticationService {
 			Authentication authentication = authenticationManager.authenticate(authenticationToken);
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 		} else {
-			// getContext(authenticationRequest.getUsername(), authenticationRequest.getPassword());
+			System.out.println("Start calling ldap");
+			getContext(authenticationRequest.getUsername(), authenticationRequest.getPassword());
+			System.out.println("calling ldap Success");
 			userDetails = (UserDetailsImpl) customUserDetailsService.loadUserByUsername(authenticationRequest.getUsername());
-
 		}
 
 		String jwtToken = jwtUtilities.generateJwtToken(authenticationRequest.getUsername());
@@ -79,6 +80,7 @@ public class AuthenticationService {
 			try {
 				return new InitialLdapContext(env, null);
 			} catch (Exception e) {
+				System.out.println("calling ldap failed with error >> " + e);
 				exceptionIfAny = e;
 				e.printStackTrace();
 			}
