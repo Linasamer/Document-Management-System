@@ -26,7 +26,7 @@ public class RestClientService {
 	private ConfigurationService configurationService;
 
 	public <T extends Object> AIUploadResponse uploadFile(String base64File, List<String> fileTags, String documentType, String documentName,
-			String correlationId, String authorization) throws Exception {
+			String correlationId) throws Exception {
 		if (configurationService.getIntegartionFlag().equals("true")) {
 			return AIUploadResponse.builder().fileId("Doc_Ref_" + UUID.randomUUID().toString()).build();
 
@@ -39,7 +39,7 @@ public class RestClientService {
 			headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 			headers.set("x-correlation-id", correlationId);
 			headers.set("x-api-key", configurationService.getAiApiKey());
-			headers.set("Authorization", authorization);
+//			headers.set("Authorization", authorization);
 
 			MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
 			body.add("esaal_file", base64File); 
@@ -65,7 +65,7 @@ public class RestClientService {
 
 	}
 
-	public <T extends Object> AIResponse updataFileTags(String Id, List<String> fileTags, String correlationId, String authorization)
+	public <T extends Object> AIResponse updataFileTags(String Id, List<String> fileTags, String correlationId)
 			throws Exception {
 		if (configurationService.getIntegartionFlag().equals("true")) {
 			return AIResponse.builder().message("File tags updated successfully").build();
@@ -78,7 +78,7 @@ public class RestClientService {
 			headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 			headers.set("x-correlation-id", correlationId);
 			headers.set("x-api-key", configurationService.getAiApiKey());
-			headers.set("Authorization", authorization);
+//			headers.set("Authorization", authorization);
 			
 			MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
 			body.add("file_id", Id);
@@ -103,7 +103,7 @@ public class RestClientService {
 
 	}
 
-	public <T extends Object> AIResponse deleteFile(String Id, String correlationId, String authorization) throws Exception {
+	public <T extends Object> AIResponse deleteFile(String Id, String correlationId) throws Exception {
 		if (configurationService.getIntegartionFlag().equals("true")) {
 			return AIResponse.builder().message("File deleted successfully").build();
 
@@ -115,7 +115,7 @@ public class RestClientService {
 			headers.setContentType(MediaType.APPLICATION_JSON);
 			headers.set("x-correlation-id", correlationId);
 			headers.set("x-api-key", configurationService.getAiApiKey());
-			headers.set("Authorization", authorization);
+//			headers.set("Authorization", authorization);
 
 			HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
 			RestTemplate restTemplate = new RestTemplate();

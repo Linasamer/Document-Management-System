@@ -41,18 +41,18 @@ public class AuthenticationService {
 				authenticationRequest.getPassword());
 		final UserDetailsImpl userDetails;
 
-		if (noLdapFlag) {
-			Authentication authentication = authenticationManager.authenticate(authenticationToken);
-			SecurityContextHolder.getContext().setAuthentication(authentication);
-		} else {
+//		if (noLdapFlag) {
+//			Authentication authentication = authenticationManager.authenticate(authenticationToken);
+//			SecurityContextHolder.getContext().setAuthentication(authentication);
+//		} else {
 			System.out.println("Start calling ldap");
 			getContext(authenticationRequest.getUsername(), authenticationRequest.getPassword());
 			System.out.println("calling ldap Success");
 			userDetails = (UserDetailsImpl) customUserDetailsService.loadUserByUsername(authenticationRequest.getUsername());
-		}
+//		}
 
 		String jwtToken = jwtUtilities.generateJwtToken(authenticationRequest.getUsername());
-		return new AuthenticationResponse(jwtToken);
+		return new AuthenticationResponse(jwtToken, userDetails.getId(), userDetails.getUsername());
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })

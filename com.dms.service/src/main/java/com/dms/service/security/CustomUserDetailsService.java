@@ -22,9 +22,33 @@ public class CustomUserDetailsService implements UserDetailsService {
 	@Override
 	@Transactional
 	public UserDetails loadUserByUsername(String username) {
-		Optional<User> user = userRepository.findByUsername(username);
-		user.orElseThrow(() -> new UsernameNotFoundException("User Not Found with username: " + username));
+	    // Attempt to find the user by username
+	    Optional<User> user = userRepository.findByUsername(username);
 
-		return user.map(UserDetailsImpl::new).get();
+	    // If the user is not found, create a new user and save it to the database
+	    User newUser = user.orElseGet(() -> {
+			System.out.println("Add the user because it's not found in db but found in ldap");
+	        User createdUser = new User();
+	        createdUser.setUsername(username);
+	        createdUser.setActive(1);
+	        createdUser.setEmail(username+"@ejada.com");
+	        createdUser.setPassword("defaultPassword"); // Set a default password, should be encrypted
+	        createdUser.setRoles("ROLE_USER"); // Assign default roles
+	        return userRepository.save(createdUser);
+	    });
+
+	    // Return UserDetails
+	    return new UserDetailsImpl(newUser);
 	}
+	
+	
+//	public UserDetails loadUserByUsername(String username) {
+//		Optional<User> user = userRepository.findByUsername(username);
+//		
+////		user.orElse(() -> new UsernameNotFoundException("User Not Found with username: " + username));
+//
+//		user.orElseThrow(() -> new UsernameNotFoundException("User Not Found with username: " + username));
+//
+//		return user.map(UserDetailsImpl::new).get();
+//	}
 }

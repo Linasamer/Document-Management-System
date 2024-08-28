@@ -2,18 +2,17 @@ package com.dms.service.exceptions;
 
 import java.util.Date;
 
-import org.springframework.http.HttpStatus;
 
 public class ErrorResponse {
 
 	private Date timestamp;
-	private HttpStatus status;
+	private int status;
 	private String path;
 	private String message;
 	private String debugMessage;
 	private Object[] parameters;
 
-	public ErrorResponse(HttpStatus status, String path, String message, Object[] parameters) {
+	public ErrorResponse(int status, String path, String message, Object[] parameters) {
 		this.timestamp = new Date();
 		this.status = status;
 		this.message = message;
@@ -21,12 +20,12 @@ public class ErrorResponse {
 		this.parameters = parameters;
 	}
 
-	public ErrorResponse(String errorMessage, HttpStatus errorCode) {
+	public ErrorResponse(String errorMessage, int errorCode) {
 		this.message = errorMessage;
 		this.status = errorCode;
 	}
 
-	public ErrorResponse(HttpStatus status, String path, String message) {
+	public ErrorResponse(int status, String path, String message) {
 		this.timestamp = new Date();
 		this.status = status;
 		this.message = message;
@@ -41,11 +40,11 @@ public class ErrorResponse {
 		this.timestamp = timestamp;
 	}
 
-	public HttpStatus getStatus() {
+	public int getStatus() {
 		return status;
 	}
 
-	public void setStatus(HttpStatus status) {
+	public void setStatus(int status) {
 		this.status = status;
 	}
 

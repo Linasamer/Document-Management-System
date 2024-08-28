@@ -37,7 +37,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 public class DocController {
 	@Autowired
 	private DocumentService documentService;
-
+  
+	
 	@PostMapping(value = "/upload")
 	@Operation(description = "Saving doc Data")
 	@ApiResponses(value = {
@@ -46,12 +47,12 @@ public class DocController {
 			@ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 			@ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 			@ApiResponse(responseCode = "503", description = "Service Unavailable", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 			@ApiResponse(responseCode = "502", description = "Generic bad gateway error", content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public ResponseEntity<DocumentInfoResponse> uploadDocument(@NotNull @RequestHeader("x-correlation-id") String correlationId,
-			@NotNull @RequestHeader(value = "Authorization", defaultValue = "defaultToken") String authorization,
 			@RequestBody DocumentRequest documentRequest) throws Exception {
 
-		DocumentInfoResponse response = documentService.saveDocument(correlationId, authorization, documentRequest);
+		DocumentInfoResponse response = documentService.saveDocument(correlationId, documentRequest);
 		return ResponseEntity.ok(response);
 
 	}
@@ -65,12 +66,13 @@ public class DocController {
 			@ApiResponse(responseCode = "404", description = "Document not found", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 			@ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 			@ApiResponse(responseCode = "503", description = "Service unavailable", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 			@ApiResponse(responseCode = "502", description = "Generic bad gateway error", content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public ResponseEntity<DocumentResponse> retrieveDocument(@NotNull @RequestHeader("x-correlation-id") String correlationId,
-			@NotNull @RequestHeader(value = "Authorization", defaultValue = "defaultToken") String authorization, @RequestParam("DocumentId") Long id)
+			 @RequestParam("DocumentId") Long id)
 			throws IOException {
 
-		DocumentResponse response = documentService.retrieveDocument(correlationId, authorization, id);
+		DocumentResponse response = documentService.retrieveDocument(correlationId, id);
 		return ResponseEntity.ok(response);
 
 	}
@@ -86,10 +88,9 @@ public class DocController {
 			@ApiResponse(responseCode = "503", description = "Service unavailable", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 			@ApiResponse(responseCode = "502", description = "Generic bad gateway error", content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public ResponseEntity<DocumentInfoResponseList> retrieveDocuments(@NotNull @RequestHeader("x-correlation-id") String correlationId,
-			@NotNull @RequestHeader(value = "Authorization", defaultValue = "defaultToken") String authorization,
 			@RequestParam(required = false) String name, @RequestParam(required = false) String tag, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
 
-		DocumentInfoResponseList documentInfoResponsesList = documentService.retrevieAllDocumentOrByName(correlationId, authorization, name, tag, page,
+		DocumentInfoResponseList documentInfoResponsesList = documentService.retrevieAllDocumentOrByName(correlationId, name, tag, page,
 				size);
 		return ResponseEntity.ok(documentInfoResponsesList);
 
@@ -106,10 +107,10 @@ public class DocController {
 			@ApiResponse(responseCode = "503", description = "Service unavailable", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 			@ApiResponse(responseCode = "502", description = "Generic bad gateway error", content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public ResponseEntity<DocumentInfoResponse> updateDocument(@NotNull @RequestHeader("x-correlation-id") String correlationId,
-			@NotNull @RequestHeader(value = "Authorization", defaultValue = "defaultToken") String authorization, @RequestParam("esaal_id") Long id,
+		    @RequestParam("esaal_id") Long id,
 			@RequestParam("file_tags") List<String> metaData) throws Exception {
 
-		DocumentInfoResponse documentInfoResponse = documentService.updateDocument(correlationId, authorization, id, metaData);
+		DocumentInfoResponse documentInfoResponse = documentService.updateDocument(correlationId, id, metaData);
 		return ResponseEntity.ok(documentInfoResponse);
 
 	}
@@ -125,10 +126,10 @@ public class DocController {
 			@ApiResponse(responseCode = "503", description = "Service unavailable", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 			@ApiResponse(responseCode = "502", description = "Generic bad gateway error", content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public ResponseEntity<String> deleteDocument(@NotNull @RequestHeader("x-correlation-id") String correlationId,
-			@NotNull @RequestHeader(value = "Authorization", defaultValue = "defaultToken") String authorization, @RequestParam Long id)
+			 @RequestParam Long id)
 			throws Exception {
 
-		documentService.deleteDocument(correlationId, authorization, id);
+		documentService.deleteDocument(correlationId, id);
 		return ResponseEntity.ok("Document Has Been Deleted Successfully");
 
 	}

@@ -42,7 +42,7 @@ public class DocumentService {
 	@Autowired
 	public RestClientService restClientService;
 
-	public DocumentInfoResponse saveDocument(String correlationId, String authorization, DocumentRequest documentRequest) throws Exception {
+	public DocumentInfoResponse saveDocument(String correlationId, DocumentRequest documentRequest) throws Exception {
 		if (documentRequest.getEsaalFile() == null || documentRequest.getEsaalFile().isEmpty()) {
 			throw new BusinessException("File is empty or null");
 		}
@@ -61,7 +61,7 @@ public class DocumentService {
 		String completeFileName = documentRequest.getEsaalFileName() + "." + documentRequest.getEsaalFileFormat();
 
 		AIUploadResponse docRef = restClientService.uploadFile(documentRequest.getEsaalFile(), documentRequest.getFileTags(),
-				documentRequest.getEsaalFileFormat(), documentRequest.getEsaalFileName(), correlationId, authorization);
+				documentRequest.getEsaalFileFormat(), documentRequest.getEsaalFileName(), correlationId);
 
 		Document document = new Document();
 		document.setDocName(documentRequest.getEsaalFileName());
@@ -81,7 +81,7 @@ public class DocumentService {
 		return DocumentInfoResponseMapper.INSTANCE.mapToDocumentInfoResponse(document, savedDocumentMetadatas);
 	}
 
-	public DocumentResponse retrieveDocument(String correlationId, String authorization, Long id) throws IOException {
+	public DocumentResponse retrieveDocument(String correlationId, Long id) throws IOException {
 		Optional<Document> documentOptional = documentRepository.findById(id);
 		if (!documentOptional.isPresent()) {
 			throw new DataNotFoundException("Document not found");
@@ -99,7 +99,7 @@ public class DocumentService {
 				.build();
 	}
 
-	public DocumentInfoResponseList retrevieAllDocumentOrByName(String correlationId, String authorization, String name, String tag, int page, int size) {
+	public DocumentInfoResponseList retrevieAllDocumentOrByName(String correlationId, String name, String tag, int page, int size) {
 		Pageable pageable = PageRequest.of(page, size);
 
 		if ((name == null || name.isEmpty()) && (tag == null || tag.isEmpty())) {
@@ -148,25 +148,25 @@ public class DocumentService {
 
 	}
 
-	public DocumentInfoResponse updateDocument(String correlationId, String authorization, Long id, List<String> metadate) throws Exception {
+	public DocumentInfoResponse updateDocument(String correlationId, Long id, List<String> metadate) throws Exception {
 		Optional<Document> updateDoc = documentRepository.findById(id);
 		if (!updateDoc.isPresent()) {
 			throw new DataNotFoundException("Doc Not Found");
 		}
-		restClientService.updataFileTags(updateDoc.get().getDocRef(), metadate, correlationId, authorization);
+		restClientService.updataFileTags(updateDoc.get().getDocRef(), metadate, correlationId);
 
 		deleteListDoumentMetaData(updateDoc.get());
 		List<DocumentMetadata> documentMetadatas = saveListDoumentMetaData(metadate, updateDoc.get());
 		return DocumentInfoResponseMapper.INSTANCE.mapToDocumentInfoResponse(updateDoc.get(), documentMetadatas);
 	}
 
-	public void deleteDocument(String correlationId, String authorization, Long id) throws Exception {
+	public void deleteDocument(String correlationId, Long id) throws Exception {
 		Optional<Document> document = documentRepository.findById(id);
 		if (!document.isPresent()) {
 			throw new DataNotFoundException("Document not found");
 		}
 
-		restClientService.deleteFile(document.get().getDocRef(), correlationId, authorization);
+		restClientService.deleteFile(document.get().getDocRef(), correlationId);
 
 		deleteListDoumentMetaData(document.get());
 
